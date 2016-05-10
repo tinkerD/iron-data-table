@@ -673,14 +673,28 @@ inspired styles to your `iron-data-table`.
 
       _onColumnFilterChanged: function(e) {
         for (var i = 0; i < this.filter.length; i++) {
-          if (this.filter[i].path === e.detail.filterBy) {
-            this.set('filter.' + i + '.filter', e.detail.value);
-            this.set('selectedItems.filters.' + i + '.filter', e.detail.value);
+          if (this.filter[i].field === e.detail.filterBy) {
+            this.set('filter.' + i + '.value', e.detail.value);
+            this.set('selectedItems.filters.' + i + '.value', e.detail.value);
             return;
           }
         }
 
         this.push('filter', {
+          field: e.detail.filterBy,
+          type: e.detail.filterType,
+          comparison: e.detail.comparison,
+          value: e.detail.value
+        });
+
+        this.push('selectedItems.filters', {
+          field: e.detail.filterBy,
+          type: e.detail.filterType,
+          comparison: e.detail.comparison,
+          value: e.detail.value
+        });
+
+        /* this.push('filter', {
           path: e.detail.filterBy,
           filter: e.detail.value
         });
@@ -688,7 +702,7 @@ inspired styles to your `iron-data-table`.
         this.push('selectedItems.filters', {
           path: e.detail.filterBy,
           filter: e.detail.value
-        });
+        }); */
       },
 
       _resizeCellContainers: function() {

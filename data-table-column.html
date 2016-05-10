@@ -131,6 +131,25 @@
           }
         },
 
+        _comparison: {
+          type: Object,
+          value: {
+            number: {
+              'Before': lt,
+              'After': gt,
+              'On': eq
+            },
+            date: {
+              '<': lt,
+              '>': gt,
+              '=': eq
+            },
+            string: 'like',
+            list: 'in',
+            'boolean': 'is'
+          }
+        },
+
         templatizeRow: {
           type: Object,
           notify: true,
@@ -158,7 +177,11 @@
       ],
 
       _filterValueChanged: function(filterValue, filterBy) {
-        this.fire('column-filter-changed', {value: filterValue, filterBy: filterBy});
+        this.fire('column-filter-changed', {value: filterValue, filterBy: filterBy, filterType: filterType, comparison: this._computeComparison()});
+      },
+
+      _computeComparison: function() {
+        //return this._comparison[filterType] 
       },
 
       _forwardParentProp: function(prop, value) {
