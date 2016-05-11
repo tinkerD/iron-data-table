@@ -77,7 +77,7 @@
         }.bind(this), 250);
       },
       _filterValueChanged: function(filterValue, filterBy) {
-        this.fire('column-filter-changed', {value: filterValue, filterBy: filterBy, filterType: filterType, comparison: this._computeComparison()});
+        this.fire('column-filter-changed', {value: filterValue, filterBy: filterBy, filterType: this.filterType, comparison: this._computeComparison()});
       },
       _computeComparison: function(filterType) {
         return this._comparison[this.filterType];
