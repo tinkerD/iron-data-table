@@ -9,10 +9,14 @@
       }
     }
   </style>
-
+  
   <template>
-    <paper-input label="[[label]]" value="[[value]]" on-value-changed="_valueChanged" hidden=[[hidden]]></paper-input>
+    <content></content>
   </template>
+
+  <!-- <template>
+    <paper-input label="[[label]]" value="[[value]]" on-value-changed="_valueChanged" hidden=[[hidden]]></paper-input>
+  </template> -->
   <script>
     Polymer({
       is: 'data-table-column-filter',
@@ -23,8 +27,46 @@
           type: String,
           notify: true
         },
+        /**
+         * Path to a property that will be filtered by this column. If set, a filter input
+         * will be automaticelly placed on the header cell of the column.
+         */
+        filterBy: String,
+
+        /**
+         * Filter value that will be used to filter the items using the property defined
+         * in `filterBy` property.
+         */
+        filterValue: String,
+
+        /**
+         * Filter value that will be used to filter the items using the property defined
+         * in `filterBy` property.
+         */
+        filterType: {
+          type:: String
+        },
+        _comparison: {
+          type: Object,
+          value: {
+            date: {
+              'Before': 'lt',
+              'After': 'gt',
+              'On': 'eq'
+            },
+            number: {
+              '<': 'lt',
+              '>': 'gt',
+              '=': 'eq'
+            },
+            string: 'like',
+            list: 'in',
+            'boolean': 'is'
+          }
+        },
         hidden: Boolean
       },
+      observers: ['_filterValueChanged(filterValue, filterBy)'],
 
       _valueChanged: function(e) {
         // store value in a variable, referring to e.detail.value inside the debounce
@@ -33,6 +75,12 @@
         this.debounce('value', function() {
           this.value = value;
         }.bind(this), 250);
+      },
+      _filterValueChanged: function(filterValue, filterBy) {
+        this.fire('column-filter-changed', {value: filterValue, filterBy: filterBy, filterType: filterType, comparison: this._computeComparison()});
+      },
+      _computeComparison: function(filterType) {
+        return this._comparison[this.filterType];
       }
     });
   </script>

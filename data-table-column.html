@@ -34,18 +34,6 @@
         },
 
         /**
-         * Path to a property that will be filtered by this column. If set, a filter input
-         * will be automaticelly placed on the header cell of the column.
-         */
-        filterBy: String,
-
-        /**
-         * Filter value that will be used to filter the items using the property defined
-         * in `filterBy` property.
-         */
-        filterValue: String,
-
-        /**
          * Minimum width of the column
          */
         width: {
@@ -131,25 +119,6 @@
           }
         },
 
-        _comparison: {
-          type: Object,
-          value: {
-            number: {
-              'Before': lt,
-              'After': gt,
-              'On': eq
-            },
-            date: {
-              '<': lt,
-              '>': gt,
-              '=': eq
-            },
-            string: 'like',
-            list: 'in',
-            'boolean': 'is'
-          }
-        },
-
         templatizeRow: {
           type: Object,
           notify: true,
@@ -172,17 +141,8 @@
       },
 
       observers: ['_forwardedParentPropsChanged(_forwardedParentProps.*)',
-        '_templateInstancesChanged(_templateInstances.splices)',
-        '_filterValueChanged(filterValue, filterBy)'
+        '_templateInstancesChanged(_templateInstances.splices)'
       ],
-
-      _filterValueChanged: function(filterValue, filterBy) {
-        this.fire('column-filter-changed', {value: filterValue, filterBy: filterBy, filterType: filterType, comparison: this._computeComparison()});
-      },
-
-      _computeComparison: function() {
-        //return this._comparison[filterType] 
-      },
 
       _forwardParentProp: function(prop, value) {
         //TODO: Bug in Templatizer forwards also [[item]] etc. instance properties
