@@ -31,30 +31,33 @@
          * Path to a property that will be filtered by this column. If set, a filter input
          * will be automaticelly placed on the header cell of the column.
          */
-        filterBy: String,
-
+        filterBy: {
+          type: String
+        },
         /**
          * Filter value that will be used to filter the items using the property defined
          * in `filterBy` property.
          */
-        filterValue: String,
+        filterValue: {
+          type: String
+        },
 
         /**
          * Filter value that will be used to filter the items using the property defined
          * in `filterBy` property.
          */
         filterType: {
-          type:: String
+          type: String
         },
         _comparison: {
           type: Object,
           value: {
-            date: {
+            number: {
               'Before': 'lt',
               'After': 'gt',
               'On': 'eq'
             },
-            number: {
+            date: {
               '<': 'lt',
               '>': 'gt',
               '=': 'eq'
