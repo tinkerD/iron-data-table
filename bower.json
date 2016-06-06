@@ -39,7 +39,13 @@
     "iron-icon": "polymerelements/iron-icon#^1.0.7",
     "paper-input": "polymerelements/paper-input#^1.1.5",
     "paper-spinner": "polymerelements/paper-spinner#^1.1.1",
-    "paper-icon-button": "polymerelements/paper-icon-button#^1.0.7"
+    "paper-icon-button": "polymerelements/paper-icon-button#^1.0.7",
+    "paper-dialog": "PolymerElements/paper-dialog#^1.0.4",
+    "paper-autocomplete": "tinkerD/paper-autocomplete#0.0.6",
+    "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^1.2.1",
+    "paper-button": "PolymerElements/paper-button#^1.0.12",
+    "paper-listbox": "PolymerElements/paper-listbox#^1.1.2",
+    "paper-toggle-button": "PolymerElements/paper-toggle-button#^1.1.2"
   },
   "devDependencies": {
     "webcomponentsjs": "^0.7.20",

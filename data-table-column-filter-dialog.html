@@ -1,0 +1,123 @@
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-dialog/paper-dialog.html">
+<link rel="import" href="../paper-listbox/paper-listbox.html">
+
+<dom-module id="data-table-column-filter">
+  <style is="custom-style">
+    iron-icon {
+      margin-right: 0;
+    }
+
+    paper-dialog { 
+      padding: 2em;
+      @apply(--layout-vertical);
+    }
+
+    .comparison {
+        width: 1em;
+    }
+  </style>
+
+  <template>
+      <iron-icon icon="filter-list" on-tap="_openDialog" hidden=[[hidden]]></iron-icon>
+      <paper-dialog id="filterDialog">
+        <h4>[[label]]</h4>
+        <paper-dialog-scrollable>
+            <template is="dom-if" if="[[ _checkType(type,'text') ]]">
+              <paper-input label="[[label]]" value="[[value]]" value="[[ filterValue ]]" on-value-changed="_valueChanged"></paper-input>
+            </template>
+            <template is="dom-if" if="[[ _checkType(type,'number') ]]">
+                <template is="dom-repeat" items="[[_comparisons]]">
+                  <div class="layout horizontal justified">
+                    <paper-input class="comparison" disabled value="[[ item.value ]]"></paper-input>
+                    <paper-input type="[[ filterType ]]" value="[[ filterValue ]]" on-value-changed="_valueChanged"></paper-input>
+                  </div>
+                </template>
+            </template>
+            <template is="dom-if" if="[[ _checkType(type,'date') ]]">
+              <template is="dom-repeat" items="[[_comparisons]]">
+                  <div class="layout horizontal justified">
+                      <paper-input class="comparison" disabled value="[[ item.label ]]"></paper-input>
+                      <paper-date-picker class="flex" value="[[value]]"></paper-date-picker>
+                  </div>
+              </template>
+            </template>
+            <template is="dom-if" if="[[ _checkType(type,'list') ]]">
+              <!-- <content select="filter-list"></content> -->
+              <!-- <template is="dom-if" if="[[ list ]]">
+                  <paper-dropdown-menu label="[[label]]">
+                      <paper-listbox class="dropdown-content" attr-for-selected="value" selected="[[ filterValue ]]">
+                        <template is="dom-repeat" items="[[ list ]]">
+                          <paper-item value="[[item]]">[[item]]</paper-item>
+                        </template>
+                      </paper-listbox>
+                  </paper-dropdown-menu>
+              </template>
+              <template is="dom-if" if="[[ resource ]]">
+                <paper-autocomplete supplier="{{ resource }}" value="{{ filterValue }}">
+                  <paper-input label="[[label]]" value="{{ filterValue }}"></paper-input>
+                </paper-autocomplete>
+              </template>
+            </template> -->
+            <template is="dom-if" if="[[ _checkType(type,'boolean') ]]">
+                <paper-toggle-button selected="[[value]]"></paper-toggle-button>
+            </template>
+        </paper-dialog-scrollable>
+        <div class="buttons">
+          <paper-button dialog-confirm>Done</paper-button>
+        </div>
+      </paper-dialog>
+  </template>
+
+  <!-- <template>
+    <paper-input label="[[label]]" value="[[value]]" on-value-changed="_valueChanged" hidden=[[hidden]]></paper-input>
+  </template> -->
+  <script>
+    Polymer({
+      is: 'data-table-column-filter',
+
+      properties: {
+        label: String,
+        value: {
+          type: String,
+          notify: true
+        },
+        _comparisons: {
+          type: Array,
+          value: [{
+            value: '<',
+            forDate: 'Before',
+            forNumber: 'Less than'
+          },{
+            value: '>',
+            forDate: 'After',
+            forNumber: 'Greater than'
+          },{
+            value: '=',
+            forDate: 'On',
+            forNumber: 'Equal to'
+          }]
+        },
+        hidden: Boolean
+      },
+      observers: [],
+
+      _valueChanged: function(e) {
+        // store value in a variable, referring to e.detail.value inside the debounce
+        // function results in weird outcomes. event object might be reused by Polymer?
+        var value = e.detail.value;
+        this.debounce('value', function() {
+          this.value = value;
+        }.bind(this), 250);
+      },
+      _checkType: function(filterType, type) {
+        return filterType === type;
+      },
+      _openDialog: function() {
+        this.$.filterDialog.open();
+      }
+    });
+  </script>
+</dom-module>

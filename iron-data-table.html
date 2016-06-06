@@ -681,17 +681,17 @@ inspired styles to your `iron-data-table`.
         }
 
         this.push('filter', {
-          field: e.detail.filterBy,
+          path: e.detail.filterBy,
           type: e.detail.filterType,
           comparison: e.detail.comparison,
-          value: e.detail.value
+          filter: e.detail.value
         });
 
         this.push('selectedItems.filters', {
-          field: e.detail.filterBy,
+          path: e.detail.filterBy,
           type: e.detail.filterType,
           comparison: e.detail.comparison,
-          value: e.detail.value
+          filter: e.detail.value
         });
 
         /* this.push('filter', {

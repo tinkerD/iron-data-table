@@ -1,17 +1,70 @@
 <link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-dialog/paper-dialog.html">
+<link rel="import" href="../paper-listbox/paper-listbox.html">
+<link rel="import" href="../paper-toggle-button/paper-toggle-button.html">
 
 <dom-module id="data-table-column-filter">
   <style is="custom-style">
-    paper-input {
-      margin-bottom: 20px;
-      --paper-input-container-label: {
-        font-size: inherit;
-      }
+   /*  paper-input {
+      margin-right: 0;
+    } */
+
+    paper-dialog { 
+      padding: 2em;
+      @apply(--layout-vertical);
+    }
+
+    .comparison {
+        width: 1em;
     }
   </style>
-  
+
   <template>
-    <content></content>
+      <iron-icon icon="filter-list" on-tap="_openDialog" hidden=[[hidden]]></iron-icon>
+      <paper-dialog id="filterDialog">
+        <h4>[[label]]</h4>
+        <template is="dom-if" if="[[ _checkType(type,'text') ]]">
+          <paper-input label="[[label]]" value="[[value]]" value="[[ filterValue ]]" on-value-changed="_valueChanged"></paper-input>
+        </template>
+        <template is="dom-if" if="[[ _checkType(type,'number') ]]">
+            <template is="dom-repeat" items="[[_comparisons]]">
+              <div class="layout horizontal">
+                <paper-input class="comparison" readonly value="[[ item.value ]]"></paper-input>
+                <paper-input type="[[ filterType ]]" value="[[ filterValue ]]" on-value-changed="_valueChanged"></paper-input>
+              </div>
+            </template>
+        </template>
+        <template is="dom-if" if="[[ _checkType(type,'date') ]]">
+          <template is="dom-repeat" items="[[_comparisons]]">
+              <div class="layout horizontal">
+                  <paper-input class="comparison" readonly value="[[ item.label ]]"></paper-input>
+                  <paper-date-picker class="flex" value="[[value]]"></paper-date-picker>
+              </div>
+          </template>
+        </template>
+        <template is="dom-if" if="[[ _checkType(type,'list') ]]">
+          <template is="dom-if" if="[[ list ]]">
+              <paper-dropdown-menu label="[[label]]">
+                  <paper-listbox class="dropdown-content" attr-for-selected="val" selected="[[ filterValue ]]">
+                    <template is="dom-repeat" items="[[ list ]]">
+                      <paper-item value="[[item]]">[[item]]</paper-item>
+                    </template>
+                  </paper-listbox>
+              </paper-dropdown-menu>
+          </template>
+          <template is="dom-if" if="[[ !list ]]">
+            <content select=".filter-list"></content>
+          </template>
+        </template>
+        <template is="dom-if" if="[[ _checkType(type,'boolean') ]]">
+            <paper-toggle-button checked$="[[value]]" on-value-changed="_valueChanged">[[label]]</paper-toggle-button>
+        </template>
+        <div class="buttons">
+          <paper-button dialog-confirm>Done</paper-button>
+        </div>
+      </paper-dialog>  
   </template>
 
   <!-- <template>
@@ -27,49 +80,24 @@
           type: String,
           notify: true
         },
-        /**
-         * Path to a property that will be filtered by this column. If set, a filter input
-         * will be automaticelly placed on the header cell of the column.
-         */
-        filterBy: {
-          type: String
-        },
-        /**
-         * Filter value that will be used to filter the items using the property defined
-         * in `filterBy` property.
-         */
-        filterValue: {
-          type: String
-        },
-
-        /**
-         * Filter value that will be used to filter the items using the property defined
-         * in `filterBy` property.
-         */
-        filterType: {
-          type: String
-        },
-        _comparison: {
-          type: Object,
-          value: {
-            number: {
-              'Before': 'lt',
-              'After': 'gt',
-              'On': 'eq'
-            },
-            date: {
-              '<': 'lt',
-              '>': 'gt',
-              '=': 'eq'
-            },
-            string: 'like',
-            list: 'in',
-            'boolean': 'is'
-          }
+        _comparisons: {
+          type: Array,
+          value: [{
+            value: '<',
+            forDate: 'Before',
+            forNumber: 'Less than'
+          },{
+            value: '>',
+            forDate: 'After',
+            forNumber: 'Greater than'
+          },{
+            value: '=',
+            forDate: 'On',
+            forNumber: 'Equal to'
+          }]
         },
         hidden: Boolean
       },
-      observers: ['_filterValueChanged(filterValue, filterBy)'],
 
       _valueChanged: function(e) {
         // store value in a variable, referring to e.detail.value inside the debounce
@@ -79,11 +107,11 @@
           this.value = value;
         }.bind(this), 250);
       },
-      _filterValueChanged: function(filterValue, filterBy) {
-        this.fire('column-filter-changed', {value: filterValue, filterBy: filterBy, filterType: this.filterType, comparison: this._computeComparison()});
+      _checkType: function(filterType, type) {
+        return filterType === type;
       },
-      _computeComparison: function(filterType) {
-        return this._comparison[this.filterType];
+      _openDialog: function() {
+        this.$.filterDialog.open();
       }
     });
   </script>
