@@ -1,75 +1,18 @@
 <link rel="import" href="../paper-input/paper-input.html">
-<link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
-<link rel="import" href="../paper-button/paper-button.html">
-<link rel="import" href="../paper-dialog/paper-dialog.html">
-<link rel="import" href="../paper-listbox/paper-listbox.html">
-<link rel="import" href="../paper-toggle-button/paper-toggle-button.html">
 
 <dom-module id="data-table-column-filter">
   <style is="custom-style">
-   /*  paper-input {
-      margin-right: 0;
-    } */
-
-    paper-dialog { 
-      padding: 2em;
-      @apply(--layout-vertical);
-    }
-
-    .comparison {
-        width: 1em;
+    paper-input {
+      margin-bottom: 20px;
+      --paper-input-container-label: {
+        font-size: inherit;
+      }
     }
   </style>
 
   <template>
-      <iron-icon icon="filter-list" on-tap="_openDialog" hidden=[[hidden]]></iron-icon>
-      <paper-dialog id="filterDialog">
-        <h4>[[label]]</h4>
-        <template is="dom-if" if="[[ _checkType(type,'text') ]]">
-          <paper-input label="[[label]]" value="[[value]]" value="[[ filterValue ]]" on-value-changed="_valueChanged"></paper-input>
-        </template>
-        <template is="dom-if" if="[[ _checkType(type,'number') ]]">
-            <template is="dom-repeat" items="[[_comparisons]]">
-              <div class="layout horizontal">
-                <paper-input class="comparison" readonly value="[[ item.value ]]"></paper-input>
-                <paper-input type="[[ filterType ]]" value="[[ filterValue ]]" on-value-changed="_valueChanged"></paper-input>
-              </div>
-            </template>
-        </template>
-        <template is="dom-if" if="[[ _checkType(type,'date') ]]">
-          <template is="dom-repeat" items="[[_comparisons]]">
-              <div class="layout horizontal">
-                  <paper-input class="comparison" readonly value="[[ item.label ]]"></paper-input>
-                  <paper-date-picker class="flex" value="[[value]]"></paper-date-picker>
-              </div>
-          </template>
-        </template>
-        <template is="dom-if" if="[[ _checkType(type,'list') ]]">
-          <template is="dom-if" if="[[ list ]]">
-              <paper-dropdown-menu label="[[label]]">
-                  <paper-listbox class="dropdown-content" attr-for-selected="val" selected="[[ filterValue ]]">
-                    <template is="dom-repeat" items="[[ list ]]">
-                      <paper-item value="[[item]]">[[item]]</paper-item>
-                    </template>
-                  </paper-listbox>
-              </paper-dropdown-menu>
-          </template>
-          <template is="dom-if" if="[[ !list ]]">
-            <content select=".filter-list"></content>
-          </template>
-        </template>
-        <template is="dom-if" if="[[ _checkType(type,'boolean') ]]">
-            <paper-toggle-button checked$="[[value]]" on-value-changed="_valueChanged">[[label]]</paper-toggle-button>
-        </template>
-        <div class="buttons">
-          <paper-button dialog-confirm>Done</paper-button>
-        </div>
-      </paper-dialog>  
-  </template>
-
-  <!-- <template>
     <paper-input label="[[label]]" value="[[value]]" on-value-changed="_valueChanged" hidden=[[hidden]]></paper-input>
-  </template> -->
+  </template>
   <script>
     Polymer({
       is: 'data-table-column-filter',
@@ -79,22 +22,6 @@
         value: {
           type: String,
           notify: true
-        },
-        _comparisons: {
-          type: Array,
-          value: [{
-            value: '<',
-            forDate: 'Before',
-            forNumber: 'Less than'
-          },{
-            value: '>',
-            forDate: 'After',
-            forNumber: 'Greater than'
-          },{
-            value: '=',
-            forDate: 'On',
-            forNumber: 'Equal to'
-          }]
         },
         hidden: Boolean
       },
@@ -106,12 +33,6 @@
         this.debounce('value', function() {
           this.value = value;
         }.bind(this), 250);
-      },
-      _checkType: function(filterType, type) {
-        return filterType === type;
-      },
-      _openDialog: function() {
-        this.$.filterDialog.open();
       }
     });
   </script>

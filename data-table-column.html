@@ -3,8 +3,10 @@
 <dom-module id="data-table-column">
   <template>
     <template id="header">
-      <div>[[column.name]]</div><!--  hidden$="[[column.filterBy]]" -->
-      <data-table-column-filter label="[[column.name]]" value="{{column.filterValue}}" hidden$="[[!column.filterBy]]" list="[[column.filterList]]" type="[[column.filterType]]"></data-table-column-filter>
+      <div hidden$="[[column.filterType]]">[[column.name]]</div>
+      <template is="dom-if" if="[[!column.filterType]]">
+        <data-table-column-filter label="[[column.name]]" value="{{column.filterValue}}" hidden$="[[!column.filterType]]"></data-table-column-filter>
+      </template>
     </template>
   </template>
   <script>
@@ -32,26 +34,24 @@
           notify: true,
           value: ''
         },
+
         /**
          * Path to a property that will be filtered by this column. If set, a filter input
-         * will be automaticelly placed on the header cell of the column.
+         * will be automatically placed on the header cell of the column.
          */
         filterBy: String,
+
         /**
-         * Filter value that will be used to filter the items using the property defined
-         * in `filterBy` property.
-         */
-        filterValue: String,
-        /**
-         * Filter value that will be used to filter the items using the property defined
-         * in `filterBy` property.
+         * Filter type for that column, it can take values 'number', 'text', 'list', 'date', 'boolean'.
          */
         filterType: {
           type: String
         },
-        filterList: {
-          type: Array
-        },
+        /**
+         * Filter list for that column, set only if the filter type is a list.
+         */
+        filterList: Array,
+        filterValue: String,
         /**
          * Minimum width of the column
          */
@@ -163,9 +163,11 @@
         '_templateInstancesChanged(_templateInstances.splices)',
         '_filterValueChanged(filterValue, filterBy)'
       ],
+
       _filterValueChanged: function(filterValue, filterBy) {
-        this.fire('column-filter-changed', {value: filterValue, filterBy: filterBy, filterType: this.filterType, comparison: this.comparison});
+        this.fire('column-filter-changed', {value: filterValue, filterBy: filterBy});
       },
+
       _forwardParentProp: function(prop, value) {
         //TODO: Bug in Templatizer forwards also [[item]] etc. instance properties
         // through this function when Shadow DOM is on AND iron-data-table is nested inside

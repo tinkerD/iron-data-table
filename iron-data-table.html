@@ -198,6 +198,9 @@ inspired styles to your `iron-data-table`.
           </div>
         </template>
       </iron-list>
+      <template is="dom-if" if="[[ customFilter ]]">
+      	<content select=".custom-filter"></content>
+      </template>
     </div>
     <paper-spinner-lite active hidden=[[!loading]]></paper-spinner-lite>
     <content select="data-table-column"></content>
@@ -263,6 +266,14 @@ inspired styles to your `iron-data-table`.
          * If `true`, tapping a row will expand the item details, if available.
          */
         detailsEnabled: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * If `true`, a filter icon will appear, which can be used to set filters for each column in the grid.
+         */
+         customFilter: {
           type: Boolean,
           value: false
         },
@@ -673,36 +684,22 @@ inspired styles to your `iron-data-table`.
 
       _onColumnFilterChanged: function(e) {
         for (var i = 0; i < this.filter.length; i++) {
-          if (this.filter[i].field === e.detail.filterBy) {
-            this.set('filter.' + i + '.value', e.detail.value);
-            this.set('selectedItems.filters.' + i + '.value', e.detail.value);
+          if (this.filter[i].path === e.detail.filterBy) {
+            this.set('filter.' + i + '.filter', e.detail.value);
+            this.set('selectedItems.filters.' + i + '.filter', e.detail.value);
             return;
           }
         }
 
         this.push('filter', {
           path: e.detail.filterBy,
-          type: e.detail.filterType,
-          comparison: e.detail.comparison,
-          filter: e.detail.value
-        });
-
-        this.push('selectedItems.filters', {
-          path: e.detail.filterBy,
-          type: e.detail.filterType,
-          comparison: e.detail.comparison,
-          filter: e.detail.value
-        });
-
-        /* this.push('filter', {
-          path: e.detail.filterBy,
           filter: e.detail.value
         });
 
         this.push('selectedItems.filters', {
           path: e.detail.filterBy,
           filter: e.detail.value
-        }); */
+        });
       },
 
       _resizeCellContainers: function() {
