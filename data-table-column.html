@@ -3,10 +3,8 @@
 <dom-module id="data-table-column">
   <template>
     <template id="header">
-      <div hidden$="[[column.filterType]]">[[column.name]]</div>
-      <template is="dom-if" if="[[!column.filterType]]">
-        <data-table-column-filter label="[[column.name]]" value="{{column.filterValue}}" hidden$="[[!column.filterType]]"></data-table-column-filter>
-      </template>
+      <div hidden$="[[ _showFilter(column.filterType, column.filterBy) ]]">[[column.name]]</div>
+      <data-table-column-filter label="[[column.name]]" value="{{column.filterValue}}" hidden$="[[ !_showFilter(column.filterType, column.filterBy) ]]"></data-table-column-filter>
     </template>
   </template>
   <script>
@@ -44,14 +42,19 @@
         /**
          * Filter type for that column, it can take values 'number', 'text', 'list', 'date', 'boolean'.
          */
-        filterType: {
-          type: String
-        },
+        filterType: String,
+
         /**
          * Filter list for that column, set only if the filter type is a list.
          */
         filterList: Array,
+
+        /**
+         * Filter value that will be used to filter the items using the property defined
+         * in `filterBy` property.
+         */
         filterValue: String,
+
         /**
          * Minimum width of the column
          */
@@ -259,6 +262,10 @@
         if (this.template) {
           this.templatize(this.template);
         }
+      },
+
+      _showFilters: function(filterType, filterBy) {
+        return !!filterType && !filterBy;
       },
 
       _templatize: function(template, parentElement) {

@@ -3,9 +3,9 @@
 
 <head>
   <!-- Using webcomponents-lite.js here to support vaadin-combo-box -->
-  <script type="text/javascript" src="../webcomponentsjs/webcomponents-lite.js"></script>
+  <script type="text/javascript" src="../../webcomponentsjs/webcomponents-lite.js"></script>
   <link rel="import" href="common.html">
-  <link rel="import" href="../vaadin-combo-box/vaadin-combo-box.html">
+  <link rel="import" href="../../vaadin-combo-box/vaadin-combo-box.html">
 </head>
 
 <body unresolved>
@@ -28,19 +28,10 @@
         <template is="dom-bind">
           <iron-ajax url="users.json" last-response="{{users}}" auto></iron-ajax>
           <iron-data-table items="[[users.results]]">
-            <data-table-column name="First Name" filter-by="user.name.first" filter-type="text">
+            <data-table-column name="First Name" filter-by="user.name.first">
               <template>[[item.user.name.first]]</template>
             </data-table-column>
-            <data-table-column name="Last Name" filter-by="user.name.last" filter-type="number">
-              <template>[[item.user.name.last]]</template>
-            </data-table-column>
-            <data-table-column name="Last Name" filter-by="user.name.last" filter-type="date">
-              <template>[[item.user.name.last]]</template>
-            </data-table-column>
-            <data-table-column name="Last Name" filter-by="user.name.last" filter-type="list" filter-list="[[items]]">
-              <template>[[item.user.name.last]]</template>
-            </data-table-column>
-            <data-table-column name="Last Name" filter-by="user.name.last" filter-type="boolean">
+            <data-table-column name="Last Name" filter-by="user.name.last">
               <template>[[item.user.name.last]]</template>
             </data-table-column>
             <data-table-column name="Email">
@@ -105,7 +96,8 @@
   <script>
     document.addEventListener('WebComponentsReady', function() {
       var combobox = document.querySelector('vaadin-combo-box');
-      var items = [
+
+      combobox.items = [
         'Alabama',
         'Alaska',
         'Arizona',
@@ -158,8 +150,6 @@
         'Wisconsin',
         'Wyoming'
       ];
-
-      combobox.items = items;
     });
   </script>
 </body>
