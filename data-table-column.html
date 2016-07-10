@@ -3,8 +3,9 @@
 <dom-module id="data-table-column">
   <template>
     <template id="header">
-      <div hidden$="[[ _showFilter(column.filterType, column.filterBy) ]]">[[column.name]]</div>
-      <data-table-column-filter label="[[column.name]]" value="{{column.filterValue}}" hidden$="[[ !_showFilter(column.filterType, column.filterBy) ]]"></data-table-column-filter>
+      <div>[[column.name]]</div><!--  hidden$="[[ _showFilter(column.filterType, column.filterBy) ]]" -->
+      <data-table-column-filter label="[[column.name]]" value="{{column.filterValue}}" hidden></data-table-column-filter>
+      <!--  hidden$="[[ !_showFilter(column.filterType, column.filterBy) ]]" -->
     </template>
   </template>
   <script>
