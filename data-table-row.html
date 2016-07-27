@@ -14,10 +14,6 @@
         @apply(--iron-data-table-row-selected);
       }
 
-      :host(:not([header]):hover) {
-        @apply(--iron-data-table-row-hover);
-      }
-
       :host(:not([header])[even]) {
         @apply(--iron-data-table-row-even);
       }
@@ -29,6 +25,10 @@
       :host(:focus) {
         outline: none;
         @apply(--iron-data-table-row-focused);
+      }
+
+      :host(:not([header]):hover) {
+        @apply(--iron-data-table-row-hover);
       }
 
       :host(:focus):after {
@@ -57,23 +57,16 @@
     Polymer({
       is: 'data-table-row',
 
-      listeners: {
-        'tap': '_onTap'
-      },
-
       properties: {
         beforeBind: Object,
-        bind: Object,
-        header: Boolean,
-        expanded: {
+        expanded: Boolean,
+        index: Number,
+        item: Object,
+        selected: {
           type: Boolean,
-          notify: false,
-          value: false,
-          reflectToAttribute: true,
-          observer: '_expandedChanged'
+          reflectToAttribute: true
         },
 
-        rowDetailTemplate: Object,
 
         _static: {
           type: Object,
@@ -81,7 +74,7 @@
         }
       },
 
-      observers: ['_bindChanged(bind, beforeBind)'],
+      observers: ['_beforeBind(beforeBind, index, item.*, selected, expanded)'],
 
       attached: function() {
         if (this.domHost && this.domHost.tagName === 'IRON-DATA-TABLE') {
@@ -96,31 +89,22 @@
             item._rowId = id;
 
             Polymer.dom(this.domHost).appendChild(this);
+            // reset the cached value for shady root owner to make this.domHost
+            // return correct value.
+            this._ownerShadyRoot = undefined;
           }
         }
       },
 
-      _bindChanged: function(data, beforeBind) {
+      _beforeBind: function(beforeBind, index, item, selected, expanded) {
+        var data = {
+          index: index,
+          item: item.base,
+          expanded: expanded,
+          selected: selected
+        };
+
         beforeBind(data, this);
-      },
-
-      _onTap: function(e) {
-        // Prevent item selection if row itself is not focused. This means that
-        // an element inside the row has been focused.
-        // Mobile devices don't move focus from body unless it's an input element that is focused, so this element will never get focused.
-        if (!this.header && document.activeElement !== document.body && Polymer.dom(document.activeElement) !== Polymer.dom(this)) {
-          e.stopPropagation();
-        } else if (this.rowDetailTemplate && this.detailsEnabled) {
-            this.expanded = !this.expanded;
-        }
-      },
-
-      _expandedChanged: function(expanded) {
-        if (expanded) {
-          this.fire('item-expanded');
-        } else {
-          this.fire('item-collapsed');
-        }
       }
     });
   </script>
