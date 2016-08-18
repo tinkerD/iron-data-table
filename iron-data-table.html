@@ -717,11 +717,13 @@ inspired styles to your `iron-data-table`.
       },
 
       _onVerticalScroll: function(e) {
-        // Toggle shadow when at the top
-        this.toggleClass("scrolled", this.$.list.scrollTop >= 1, this.$.header);
+        this.debounce('scrollDebounce', function() {
+          // Toggle shadow when at the top
+          this.toggleClass("scrolled", this.$.list.scrollTop >= 1, this.$.header);
 
-        var calculatedOffset = this.$.list.scrollTop + this.offsetHeight;
-        this._currentPage = Math.max(0, Math.floor(calculatedOffset / this.$.list._physicalAverage / this.pageSize));
+          var calculatedOffset = this.$.list.scrollTop + this.offsetHeight;
+          this._currentPage = Math.max(0, Math.floor(calculatedOffset / this.$.list._physicalAverage / this.pageSize));
+        }, 200);
       },
 
       /**
