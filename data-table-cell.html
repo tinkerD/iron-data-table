@@ -92,9 +92,13 @@
 
       _ellipsisChanged: function(ellipsis) {
         this.async(function() {
-          var span = this.$$('.ellipsis');
-          if (ellipsis && span) {
-            this.set('tooltip', span.innerHTML);
+          if (ellipsis) {
+            this.addEventListener('mouseover', function() {
+              var span = this.$$('.ellipsis');
+              if (span) {
+                this.set('tooltip', span.innerHTML);
+              }
+            }.bind(this));
           }
         }.bind(this), 500);
       },
