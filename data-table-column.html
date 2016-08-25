@@ -134,7 +134,16 @@
               return template;
             }
           }
+        },
+
+        /**
+        * Checks if go to ellipsis mode [!important] Data must be plain text
+        */
+        ellipsis: {
+          type: Boolean,
+          value: false
         }
+
       },
 
       observers: [
@@ -148,7 +157,8 @@
         '_orderChanged(table, order)',
         '_sortByChanged(table, sortBy)',
         '_templateChanged(table, template)',
-        '_widthChanged(table, width)'
+        '_widthChanged(table, width)',
+        '_ellipsisChanged(table, ellipsis)'
       ],
 
       _notifyTable: function(table, path, value) {
@@ -201,6 +211,10 @@
       _filterValueChanged: function(table, filterValue, filterBy) {
         this._notifyTable(table, 'filterValue', filterValue);
         this.fire('column-filter-changed', {value: filterValue, filterBy: filterBy});
+      },
+
+      _ellipsisChanged: function(table, ellipsis) {
+        this._notifyTable(table, 'ellipsis', ellipsis);
       }
     });
   </script>

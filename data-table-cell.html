@@ -21,8 +21,22 @@
       :host([hidden]) {
         display: none;
       }
+
+      .ellipsis {
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
     </style>
-    <content></content>
+    <template restamp is="dom-if" if="[[!ellipsis]]">
+      <content></content>
+    </template>
+    <template restamp is="dom-if" if="[[ellipsis]]">
+      <span title="{{tooltip}}" class="ellipsis">
+        <content></content>
+      </span>
+    </template>
   </template>
   <script>
     Polymer({
@@ -38,7 +52,13 @@
         order: Number,
         template: Object,
         width: String,
-
+        ellipsis: {
+          type: Boolean,
+          value: false
+        },
+        tooltip: {
+          type: String
+        },
         beforeBind: {
           type: Object,
           value: function() {
@@ -56,7 +76,9 @@
                   '_flexChanged(flex)',
                   '_hiddenChanged(hidden)',
                   '_orderChanged(order)',
-                  '_widthChanged(width)'],
+                  '_widthChanged(width)',
+                  '_ellipsisChanged(ellipsis)'
+                ],
 
       attached: function() {
         if (!Polymer.Settings.useNativeShadow) {
@@ -66,6 +88,15 @@
             Polymer.StyleTransformer.dom(this, this.domHost.tagName.toLowerCase(), this._scopeCssViaAttr, false);
           }
         }
+      },
+
+      _ellipsisChanged: function(ellipsis) {
+        this.async(function() {
+          var span = this.$$('.ellipsis');
+          if (ellipsis && span) {
+            this.set('tooltip', span.innerHTML);
+          }
+        }.bind(this), 500);
       },
 
       _alignRightChanged: function(alignRight) {
