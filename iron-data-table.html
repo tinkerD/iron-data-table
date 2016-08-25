@@ -154,11 +154,11 @@ inspired styles to your `iron-data-table`.
         opacity: 0.25;
       }
 
-      :host(:not([loading])) paper-spinner-lite {
+      :host(:not([loading])) paper-spinner-lite,:host(:not([mask])) paper-spinner-lite {
         display: none;
       }
 
-      :host([loading]) paper-spinner-lite {
+      :host([loading]) paper-spinner-lite,:host([mask]) paper-spinner-lite {
         position: absolute;
         top: 45%;
         left: 50%;
@@ -473,7 +473,15 @@ inspired styles to your `iron-data-table`.
           value: function() {
             return this;
           }
-        }
+        },
+        /**
+         * Enable or disable load-mask (spinner) 
+         */
+         mask: {
+           type: Object,
+           reflectToAttribute: true,
+           value: true
+         }
       },
 
       observers: ['_itemsChanged(items.*)',
