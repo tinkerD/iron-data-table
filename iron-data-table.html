@@ -356,7 +356,7 @@ inspired styles to your `iron-data-table`.
          */
         selectedItem: {
           type: Object,
-          readOnly: true,
+          //readOnly: true,
           notify: true
         },
 
@@ -368,7 +368,7 @@ inspired styles to your `iron-data-table`.
         selectedItems: {
           type: Object,
           notify: true,
-          readOnly: true,
+          //readOnly: true,
           value: function() {
             var items = [];
             items.filters = [];
@@ -539,7 +539,7 @@ inspired styles to your `iron-data-table`.
       },
 
       _selectItem: function(item) {
-        this._setSelectedItem(item);
+        this.set('selectedItem', item);
 
         if (this.multiSelection) {
           if (this.selectedItems.inverted) {
@@ -570,7 +570,7 @@ inspired styles to your `iron-data-table`.
       },
 
       _deselectItem: function(item) {
-        this._setSelectedItem(null);
+        this.set('selectedItem', null);
 
         var index = this.selectedItems.indexOf(item);
 
@@ -601,7 +601,7 @@ inspired styles to your `iron-data-table`.
         // notifications for both filter and selectedItems.filter
         selectedItems.filters = this.filter.slice(0) || [];
 
-        this._setSelectedItems(selectedItems);
+        this.set('selectedItems', selectedItems);
       },
 
       /**
@@ -614,7 +614,7 @@ inspired styles to your `iron-data-table`.
         // notifications for both filter and selectedItems.filter
         selectedItems.filters = this.filter.slice(0) || [];
 
-        this._setSelectedItems(selectedItems);
+        this.set('selectedItems', selectedItems);
       },
 
       _toggleSelectAll: function() {
