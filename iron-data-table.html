@@ -234,7 +234,7 @@ inspired styles to your `iron-data-table`.
           </div>
         </template>
       </iron-list>
-      <template is="dom-if" if="[[ refreshInterval ]]">
+      <template is="dom-if" if="[[ autoRefreshEnabled ]]">
         <paper-toggle-button checked="{{ autoRefresh }}" title="Auto Refresh"></paper-toggle-button>
       </template>
     </div>
@@ -302,6 +302,16 @@ inspired styles to your `iron-data-table`.
          */
         items: {
           type: Array
+        },
+
+        /**
+         * If `true`, a toggle icon will be visible, to enable/disable the autorefresh.
+         */
+        autoRefreshEnabled: {
+          type: Boolean,
+          value: function() {
+            return Polymer.dom(this).node.hasAttribute('auto-refresh');
+          }
         },
 
         /**
