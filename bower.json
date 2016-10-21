@@ -38,7 +38,8 @@
     "paper-input": "polymerelements/paper-input#^1.1.5",
     "paper-spinner": "polymerelements/paper-spinner#^1.1.1",
     "paper-icon-button": "polymerelements/paper-icon-button#^1.0.7",
-    "iron-iconset-svg": "polymerelements/iron-iconset-svg#^1.0.9"
+    "iron-iconset-svg": "polymerelements/iron-iconset-svg#^1.0.9",
+    "paper-toggle-button": "^1.2.1"
   },
   "devDependencies": {
     "webcomponentsjs": "^0.7.20",
