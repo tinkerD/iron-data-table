@@ -51,6 +51,21 @@
         filterValue: String,
 
         /**
+         * Filter data-source for that column, set only if the filter type is a list and it is a remote filter.
+         */
+        filterSource: Object,
+
+        /**
+         * id-accessor that will be used by the filter data-source
+         */
+        idAccessor: String,
+
+        /**
+         * label-accessor that will be used by the filter data-source
+         */
+        labelAccessor: String,
+
+        /**
          * Minimum width of the column
          */
         width: {
@@ -148,7 +163,7 @@
 
       observers: [
         '_alignRightChanged(table, alignRight)',
-        '_filterValueChanged(table, filterValue, filterBy)',
+        //'_filterValueChanged(table, filterValue, filterBy)',
         '_filterByChanged(table, filterBy)',
         '_flexChanged(table, flex)',
         '_headerTemplateChanged(table, headerTemplate)',
