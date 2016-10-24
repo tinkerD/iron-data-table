@@ -11,23 +11,17 @@
 </head>
 
 <body>
-  <test-fixture id="grid-filters">
+  <test-fixture id="grid">
     <template>
       <iron-data-table>
-        <data-table-column name="First" filter-by="item.value1" filter-type="text">
-          <template>[[item.value1]]</template>
+        <data-table-column name="First" filter-by="value">
+          <template>[[item.value]]</template>
         </data-table-column>
-        <data-table-column name="First" filter-by="item.value2" filter-type="date">
+        <data-table-column name="Second" filter-by="value2">
           <template>[[item.value2]]</template>
         </data-table-column>
-        <data-table-column name="First" filter-by="item.value3" filter-type="number">
-          <template>[[item.value3]]</template>
-        </data-table-column>
-        <data-table-column name="First" filter-by="item.value4" filter-type="list">
-          <template>[[item.value4]]</template>
-        </data-table-column>
-        <data-table-column name="First" filter-by="item.value5" filter-type="boolean">
-          <template>[[item.value5]]</template>
+        <data-table-column name="Third">
+          <template>[[item.value]]</template>
         </data-table-column>
       </iron-data-table>
     </template>
@@ -37,31 +31,88 @@
     describe('Filtering', function() {
       var grid;
       beforeEach(function(done) {
-        grid = fixture('grid-filters');
+        grid = fixture('grid');
 
         Polymer.dom.flush();
 
         grid.items = [{
-          value1: 'foo',//text
-          value2: 'fooz',//date
-          value1: 'foo',//number
-          value2: 'fooz',//list
-          value2: 'fooz'//boolean
+          value: 'foo',
+          value2: 'fooz'
         }, {
-          value1: 'bar',
-          value2: 'bah',
-          value1: 'bar',
-          value2: 'bah',
+          value: 'bar',
           value2: 'bah'
         }, {
-          value1: 'qux',
-          value2: 'baz',
-          value1: 'qux',
-          value2: 'baz',
-          value1: 'qux'
+          value: 'qux',
+          value2: 'baz'
         }];
 
         Polymer.Base.async(done);
+      });
+
+      describe('using filter-value property', function() {
+        it('should update `filters`', function() {
+          grid.columns[0].filterValue = 'foo';
+
+          expect(grid.filter[0].filter).to.eql('foo');
+        });
+
+        it('should filter with `false` value', function() {
+          grid.columns[0].filterValue = false;
+
+          expect(grid.filter[0].filter).to.eql(false);
+        });
+      });
+
+      describe('using `filter` property', function() {
+        it('should pass filter to `dataSource`', function(done) {
+          grid.dataSource = function(params) {
+            expect(params.filter[0].filter).to.eql('foo');
+            done();
+          };
+
+          grid.push('filter', {filter: 'foo', path: 'bar'});
+        });
+
+        it('should filter with `false` filter', function() {
+          grid.push('filter', {filter: false, path: 'value'});
+
+          grid.flushDebouncer('loading');
+
+          expect(grid.size).to.eql(0);
+        });
+
+        it('should filter with empty string as filter', function() {
+          grid.push('filter', {filter: '', path: 'value'});
+
+          grid.flushDebouncer('loading');
+
+          expect(grid.size).to.eql(3);
+        });
+
+        it('should not filter with `undefined` filter', function() {
+          grid.push('filter', {filter: undefined, path: 'value'});
+
+          grid.flushDebouncer('loading');
+
+          expect(grid.size).to.eql(3);
+        });
+
+        it('should not filter with `null` filter', function() {
+          grid.push('filter', {filter: null, path: 'value'});
+
+          grid.flushDebouncer('loading');
+
+          expect(grid.size).to.eql(3);
+        });
+
+        it('should filter items with `false` value', function() {
+          grid.items[0].value = false;
+          grid.push('filter', {filter: false, path: 'value'});
+
+          grid.flushDebouncer('loading');
+
+          expect(grid.size).to.eql(1);
+        });
       });
 
       function columnSortElement(index) {
@@ -69,111 +120,6 @@
 
         return headerCells[index].querySelector('data-table-column-sort');
       }
-
-      describe('basic tests for filters', function() {
-        it('show filter icon', function() {
-          expect(columnSortElement(0).hidden).to.be.false;
-        });
-      });
-
-      describe('text filters', function() {
-        it('show filter content', function() {
-          expect(columnSortElement(0).hidden).to.be.false;
-          expect(columnSortElement(1).hidden).to.be.false;
-          expect(columnSortElement(2).hidden).to.be.true;
-        });
-      });
-      
-      describe('number filters', function() {
-            
-      });
-          
-      describe('list filters', function() {
-      
-      });
-    
-      describe('date filters', function() {
-      
-      });
-    
-      describe('boolean filters', function() {
-      
-      });
-
-      /* describe('using sorting icon', function() {
-        it('should show sorting icon only for columns with sort property', function() {
-          expect(columnSortElement(0).hidden).to.be.false;
-          expect(columnSortElement(1).hidden).to.be.false;
-          expect(columnSortElement(2).hidden).to.be.true;
-        });
-
-        it('should activate sorting on tap', function() {
-          var sortIcon = columnSortElement(0).$.sortIcon;
-
-          fireEvent('tap', {}, sortIcon);
-
-          expect(columnSortElement(0).querySelector('paper-icon-button').hasAttribute('direction')).to.be.true;
-        });
-
-        it('should change sorting direction on tap', function() {
-          var columnSort = columnSortElement(0);
-
-          fireEvent('tap', {}, columnSort.$.sortIcon);
-
-          expect(columnSort.direction).to.eql('asc');
-        });
-
-        it('should sort items ascending on tap', function() {
-          var columnSort = columnSortElement(0);
-
-          fireEvent('tap', {}, columnSort.$.sortIcon);
-
-          expect(grid.sortOrder[0]).to.eql({
-            path: 'value',
-            direction: 'asc'
-          });
-        });
-
-        it('should sort items descending on double tap', function() {
-          var columnSort = columnSortElement(0);
-
-          fireEvent('tap', {}, columnSort.$.sortIcon);
-          fireEvent('tap', {}, columnSort.$.sortIcon);
-
-          expect(grid.sortOrder[0]).to.eql({
-            path: 'value',
-            direction: 'desc'
-          });
-        });
-      });
-
-      describe('using sortOrder property', function() {
-        it('should sort items ascending', function(done) {
-          grid.push('sortOrder', {path: 'value', direction: 'asc'});
-
-          grid.async(function() {
-            expect(grid.$.list.items[0]).to.eql({value: 'bar', value2: 'bah'});
-            done();
-          }, 100);
-        });
-
-        it('should sort items descending', function(done) {
-          grid.push('sortOrder', {path: 'value', direction: 'desc'});
-
-          grid.async(function() {
-            expect(grid.$.list.items[0]).to.eql({value: 'qux', value2: 'baz'});
-            done();
-          }, 100);
-        });
-
-        it('should update sorting icon', function() {
-          grid.push('sortOrder', {path: 'value2', direction: 'desc'});
-
-          var columnSort = columnSortElement(1);
-
-          expect(columnSort.direction).to.eql('desc');
-        });
-      }); */
     });
   </script>
 
