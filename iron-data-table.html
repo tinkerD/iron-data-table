@@ -238,8 +238,8 @@ inspired styles to your `iron-data-table`.
       <template is="dom-if" if="[[ customFilter ]]">
         <content select=".custom-filter"></content>
       </template>
-      <template is="dom-if" if="[[ autoRefreshEnabled ]]">
-        <paper-toggle-button checked="{{ refreshListItems }}" title="Refresh Page"></paper-toggle-button>
+      <template is="dom-if" if="[[ showRefreshButton ]]">
+        <paper-toggle-button checked="{{ enableAutoRefresh }}" title="[[ autoRefreshLabel ]]"></paper-toggle-button>
       </template>
     </div>
     <paper-spinner-lite active></paper-spinner-lite>
@@ -317,17 +317,17 @@ inspired styles to your `iron-data-table`.
         /**
          * If `true`, a toggle icon will be visible, to enable/disable the autorefresh.
          */
-        autoRefreshEnabled: {
+        showRefreshButton: {
           type: Boolean,
           value: function() {
-            return Polymer.dom(this).node.hasAttribute('refresh-list-items');
+            return Polymer.dom(this).node.hasAttribute('enable-auto-refresh');
           }
         },
 
         /**
          * If `true`, the list will autmatically update after the specified time.
          */
-        refreshListItems: {
+        enableAutoRefresh: {
           type: Boolean,
           value: false
         },
@@ -338,6 +338,13 @@ inspired styles to your `iron-data-table`.
         refreshInterval: {
           type: Number,
           value: 20000
+        },
+
+        /**
+         * Tooltip for the refresh toggle button.
+         */
+        autoRefreshLabel: {
+          type: String
         },
 
         /**
@@ -535,7 +542,7 @@ inspired styles to your `iron-data-table`.
       ],
 
       attached: function() {
-        if (this.refreshListItems) {
+        if (this.enableAutoRefresh) {
           this._refreshData(this.dataSource, this._currentPage);
         }
       },
@@ -1116,7 +1123,7 @@ inspired styles to your `iron-data-table`.
       },
 
       _refreshData: function() {
-        if (this.refreshListItems) {
+        if (this.enableAutoRefresh) {
           if (this.isDebouncerActive('reloadData')) {
             this.cancelDebouncer('reloadData');
           }
