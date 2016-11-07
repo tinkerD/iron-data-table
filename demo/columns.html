@@ -21,7 +21,7 @@
       </ul>
     </nav>
 
-    <h3>Column Resizing</h3>
+    <h3>Column Resizing and Ellipsis</h3>
     <demo-snippet>
       <template>
         <template is="dom-bind">
@@ -36,7 +36,7 @@
             <data-table-column name="Last Name" width="[[width2]]">
               <template>[[item.user.name.last]]</template>
             </data-table-column>
-            <data-table-column name="Email" flex="[[flex]]">
+            <data-table-column name="Email" flex="[[flex]]" ellipsis>
               <template>[[item.user.email]]</template>
             </data-table-column>
           </iron-data-table>
