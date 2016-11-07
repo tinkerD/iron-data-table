@@ -1129,8 +1129,7 @@ inspired styles to your `iron-data-table`.
           }
           this.debounce('reloadData', this._refreshData, this.refreshInterval);
           if (this.dataSource) {
-            this._cachedPages = [];
-            this._loadPage(this.dataSource, this._currentPage);
+            this.refreshPage(this._currentPage);
           }
         }
       }
