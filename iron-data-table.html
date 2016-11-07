@@ -155,11 +155,11 @@ inspired styles to your `iron-data-table`.
         opacity: 0.25;
       }
 
-      :host(:not([loading])) paper-spinner-lite {
+      :host(:not([loading])) paper-spinner-lite,:host(:not([mask])) paper-spinner-lite {
         display: none;
       }
 
-      :host([loading]) paper-spinner-lite {
+      :host([loading]) paper-spinner-lite,:host([mask]) paper-spinner-lite {
         position: absolute;
         top: 45%;
         left: 50%;
@@ -197,8 +197,7 @@ inspired styles to your `iron-data-table`.
       <iron-list id="list" as="item" items="[[_cachedItems]]" on-scroll="_onVerticalScroll">
         <template>
           <div class="item">
-            <data-table-row on-click="_onRowClick"
-                            before-bind="[[beforeRowBind]]"
+            <data-table-row before-bind="[[beforeRowBind]]"
                             even$="[[!_isEven(index)]]"
                             expanded="[[_isExpanded(item, _expandedItems, _expandedItems.*)]]"
                             index="[[index]]"
@@ -213,9 +212,11 @@ inspired styles to your `iron-data-table`.
                                  column="[[column]]"
                                  expanded="[[_isExpanded(item, _expandedItems, _expandedItems.*)]]"
                                  flex="[[column.flex]]"
+                                 ellipsis="[[column.ellipsis]]"
                                  hidden="[[column.hidden]]"
                                  index="[[index]]"
                                  item="[[item]]"
+                                 on-click="_onCellClick"
                                  order="[[column.order]]"
                                  selected="[[_isSelected(item, selectedItems, selectedItems.*)]]"
                                  width="[[column.width]]"
@@ -234,8 +235,11 @@ inspired styles to your `iron-data-table`.
           </div>
         </template>
       </iron-list>
+      <template is="dom-if" if="[[ customFilter ]]">
+        <content select=".custom-filter"></content>
+      </template>
       <template is="dom-if" if="[[ autoRefreshEnabled ]]">
-        <paper-toggle-button checked="{{ autoRefresh }}" title="Auto Refresh"></paper-toggle-button>
+        <paper-toggle-button checked="{{ refreshListItems }}" title="Refresh Page"></paper-toggle-button>
       </template>
     </div>
     <paper-spinner-lite active></paper-spinner-lite>
@@ -259,6 +263,12 @@ inspired styles to your `iron-data-table`.
       },
 
       properties: {
+
+        /**
+         * Timeout after which the data on the currently visible page will be automatically
+         * refreshed after an item has been changed through a two-way binding.
+         */
+        autoRefresh: Number,
 
         /**
          * A function that is called before data is bound to a row or header cell.
@@ -310,14 +320,14 @@ inspired styles to your `iron-data-table`.
         autoRefreshEnabled: {
           type: Boolean,
           value: function() {
-            return Polymer.dom(this).node.hasAttribute('auto-refresh');
+            return Polymer.dom(this).node.hasAttribute('refresh-list-items');
           }
         },
 
         /**
          * If `true`, the list will autmatically update after the specified time.
          */
-        autoRefresh: {
+        refreshListItems: {
           type: Boolean,
           value: false
         },
@@ -334,6 +344,14 @@ inspired styles to your `iron-data-table`.
          * If `true`, tapping a row will expand the item details, if available.
          */
         detailsEnabled: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * If `true`, a filter icon will appear, which can be used to set filters for each column in the grid.
+         */
+         customFilter: {
           type: Boolean,
           value: false
         },
@@ -381,7 +399,7 @@ inspired styles to your `iron-data-table`.
          */
         selectedItem: {
           type: Object,
-          readOnly: true,
+          //readOnly: true,
           notify: true
         },
 
@@ -393,7 +411,7 @@ inspired styles to your `iron-data-table`.
         selectedItems: {
           type: Object,
           notify: true,
-          readOnly: true,
+          //readOnly: true,
           value: function() {
             var items = [];
             items.filters = [];
@@ -408,7 +426,8 @@ inspired styles to your `iron-data-table`.
         size: {
           type: Number,
           notify: true,
-          value: 0
+          value: 0,
+          observer: '_sizeChanged'
         },
 
         /**
@@ -452,9 +471,10 @@ inspired styles to your `iron-data-table`.
         },
 
         _pagesLoading: {
-          type: Number,
-          observer: '_pagesLoadingChanged',
-          value: 0
+          type: Array,
+          value: function() {
+            return [];
+          },
         },
 
         /**
@@ -498,17 +518,24 @@ inspired styles to your `iron-data-table`.
           value: function() {
             return this;
           }
-        }
+        },
+        /**
+         * Enable or disable load-mask (spinner) 
+         */
+         mask: {
+           type: Object,
+           reflectToAttribute: true,
+           value: true
+         }
       },
 
       observers: ['_itemsChanged(items.*)',
-        '_sizeChanged(size)',
         '_currentPageChanged(dataSource, _currentPage)',
         '_resetData(dataSource, filter.*, sortOrder.*)'
       ],
 
       attached: function() {
-        if (this.autoRefresh) {
+        if (this.refreshListItems) {
           this._refreshData(this.dataSource, this._currentPage);
         }
       },
@@ -516,12 +543,12 @@ inspired styles to your `iron-data-table`.
       created: function() {
         this._observer = Polymer.dom(this).observeNodes(function(info) {
           var hasColumns = function(node) {
-            return (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'DATA-TABLE-COLUMN');
+            return (node.nodeType === Node.ELEMENT_NODE && node.tagName.toUpperCase() === 'DATA-TABLE-COLUMN');
           };
 
           var hasDetails = function(node) {
             return (node.nodeType === Node.ELEMENT_NODE &&
-              node.tagName === 'TEMPLATE' && node.hasAttribute('is') &&
+              node.tagName.toUpperCase() === 'TEMPLATE' && node.hasAttribute('is') &&
               node.getAttribute('is') === 'row-detail');
           };
 
@@ -562,7 +589,7 @@ inspired styles to your `iron-data-table`.
       },
 
       _selectItem: function(item) {
-        this._setSelectedItem(item);
+        this.set('selectedItem', item);
 
         if (this.multiSelection) {
           if (this.selectedItems.inverted) {
@@ -593,7 +620,7 @@ inspired styles to your `iron-data-table`.
       },
 
       _deselectItem: function(item) {
-        this._setSelectedItem(null);
+        this.set('selectedItem', null);
 
         var index = this.selectedItems.indexOf(item);
 
@@ -624,7 +651,7 @@ inspired styles to your `iron-data-table`.
         // notifications for both filter and selectedItems.filter
         selectedItems.filters = this.filter.slice(0) || [];
 
-        this._setSelectedItems(selectedItems);
+        this.set('selectedItems', selectedItems);
       },
 
       /**
@@ -637,7 +664,11 @@ inspired styles to your `iron-data-table`.
         // notifications for both filter and selectedItems.filter
         selectedItems.filters = this.filter.slice(0) || [];
 
-        this._setSelectedItems(selectedItems);
+        this.set('selectedItems', selectedItems);
+
+        if (this.selectedItem !== undefined) {
+          this.set('selectedItem', null);
+        }
       },
 
       _toggleSelectAll: function() {
@@ -749,10 +780,13 @@ inspired styles to your `iron-data-table`.
       },
 
       _onVerticalScroll: function(e) {
-        // Toggle shadow when at the top
-        this.toggleClass("scrolled", this.$.list.scrollTop >= 1, this.$.header);
+        this.debounce('scrollDebounce', function() {
+          // Toggle shadow when at the top
+          this.toggleClass("scrolled", this.$.list.scrollTop >= 1, this.$.header);
 
-        this._currentPage = Math.max(0, Math.floor(this.$.list.scrollTop / this.$.list._physicalAverage / this.pageSize));
+          var calculatedOffset = this.$.list.scrollTop + this.offsetHeight;
+          this._currentPage = Math.max(0, Math.floor(calculatedOffset / this.$.list._physicalAverage / this.pageSize));
+        }, 200);
       },
 
       /**
@@ -781,10 +815,16 @@ inspired styles to your `iron-data-table`.
             this.set('items.' + index + '.' + e.detail.path, e.detail.value);
           }
         }
+
+        if (this.autoRefresh !== undefined) {
+          this.debounce('auto-refresh', function() {
+            this.refreshPage(this._currentPage);
+          }, this.autoRefresh);
+        }
       },
 
       _currentPageChanged: function(dataSource, page) {
-        if (this._cachedPages && this._cachedPages.indexOf(page) === -1) {
+        if (!this._isPageCached(page)) {
           this.loading = true;
         }
 
@@ -801,13 +841,44 @@ inspired styles to your `iron-data-table`.
         }.bind(this), 100);
       },
 
+      _isPageLoading: function(page) {
+        return this._pagesLoading.indexOf(page) > -1;
+      },
+
+      _addLoadingPage: function(page) {
+        if (!this._isPageLoading(page)) {
+          this.push('_pagesLoading', page);
+        }
+
+        this.loading = this._pagesLoading.length > 0;
+      },
+
+      _removeLoadingPage: function(page) {
+        var index = this._pagesLoading.indexOf(page);
+        if (index !== -1) {
+          this.splice('_pagesLoading', index, 1);
+        }
+
+        this.loading = this._pagesLoading.length > 0;
+      },
+
+      _isPageCached: function(page) {
+        return this._cachedPages && this._cachedPages.indexOf(page) > -1;
+      },
+
       _loadPage: function(dataSource, page) {
-        if (this._cachedPages && this._cachedPages.indexOf(page) === -1) {
-          this._pagesLoading++;
-          this.push('_cachedPages', page);
+        if (this._isPageCached(page)) {
+          this._removeLoadingPage(page);
+        } else if (!this._isPageLoading(page)) {
+          this._addLoadingPage(page);
 
           var success = function(items, size) {
-            this.size = size || this.size;
+            this.push('_cachedPages', page);
+
+            if (size !== undefined) {
+              this.size = size;
+            }
+
             var start = page * this.pageSize;
 
             for (var i = 0; i < this.pageSize; i++) {
@@ -835,14 +906,11 @@ inspired styles to your `iron-data-table`.
               this.$.list.notifyResize();
             }.bind(this), 100);
 
-            this._pagesLoading--;
+            this._removeLoadingPage(page);
           }.bind(this);
 
           var err = function() {
-            var index = this._cachedPages.indexOf(page);
-            this._cachedPages.splice(index, 1);
-
-            this._pagesLoading--;
+            this._removeLoadingPage(page);
           }.bind(this);
 
           dataSource({
@@ -854,7 +922,7 @@ inspired styles to your `iron-data-table`.
         }
       },
 
-      _sizeChanged: function(size) {
+      _sizeChanged: function(size, oldSize) {
         // Optimization: Calling `set` on _cachedItems will reset the scroll position and selections,
         // using `push` and `pop` with large changes (more than 1000 items) is a heavy operation
         // that jams things up.
@@ -875,6 +943,14 @@ inspired styles to your `iron-data-table`.
 
           this.set('_cachedItems', items);
         }
+
+        // when size increases, old last page needs to be refreshed.
+        if (size > oldSize) {
+          var oldLastPage = Math.floor(oldSize / this.pageSize);
+          if (this._isPageCached(oldLastPage) || oldLastPage === 0) {
+            this.refreshPage(oldLastPage);
+          }
+        }
       },
 
       /**
@@ -884,11 +960,21 @@ inspired styles to your `iron-data-table`.
         this._cachedPages = [];
 
         // Force reload on currently visible pages.
-        this._currentPageChanged(this.dataSource, this._currentPage);
+        this.refreshPage(this._currentPage);
       },
 
-      _pagesLoadingChanged: function(pagesLoading) {
-        this.loading = pagesLoading > 0;
+      /**
+       * Clears the cache for a page and reloads the data from datasource.
+       */
+      refreshPage: function(page) {
+        if (this._cachedPages) {
+          var index = this._cachedPages.indexOf(page);
+          if (index > -1) {
+            this.splice('_cachedPages', index, 1);
+          }
+        }
+
+        this._currentPageChanged(this.dataSource, page);
       },
 
       _updateSizeForItem: function(event) {
@@ -950,7 +1036,7 @@ inspired styles to your `iron-data-table`.
         } else {
           // unreliable with Shadow, document.activeElement doesn't go inside
           // the shadow root.
-          return target.contains(Polymer.dom(document.activeElement).node) || target.tagName === 'A';
+          return target.contains(Polymer.dom(document.activeElement).node) || target.tagName.toUpperCase() === 'A';
         }
       },
 
@@ -991,7 +1077,7 @@ inspired styles to your `iron-data-table`.
       // we need to listen to click instead of tap because on mobile safari, the
       // document.activeElement has not been updated (focus has not been shifted)
       // yet at the point when tap event is being executed.
-      _onRowClick: function(e) {
+      _onCellClick: function(e) {
         // Prevent item selection if row itself is not focused. This means that
         // an element inside the row has been focused.
         // Mobile devices don't move focus from body unless it's an input element that is focused, so this element will never get focused.
@@ -1030,7 +1116,7 @@ inspired styles to your `iron-data-table`.
       },
 
       _refreshData: function() {
-        if (this.autoRefresh) {
+        if (this.refreshListItems) {
           if (this.isDebouncerActive('reloadData')) {
             this.cancelDebouncer('reloadData');
           }

@@ -312,6 +312,18 @@
 
           first.click();
         });
+
+        it('should be able to select using checkbox when selection not enabled', function(done) {
+          table.selectionEnabled = false;
+          table.multiSelection = true;
+
+          table.querySelector('data-table-checkbox:not([header])').click();
+
+          table.async(function() {
+            expect(table.selectedItems[0]).to.eql('foo')
+            done();
+          });
+        });
       });
 
       describe('using two-way binding', function() {
@@ -374,6 +386,14 @@
         grid.selectItem(0);
 
         grid.deselectItem(0);
+
+        expect(grid.selectedItem).to.be.null;
+      });
+
+      it('should deselect on clear', function() {
+        grid.selectItem(0);
+
+        grid.clearSelection();
 
         expect(grid.selectedItem).to.be.null;
       });
