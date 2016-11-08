@@ -19,6 +19,7 @@ limitations under the License.
 <link rel="import" href="../iron-list/iron-list.html">
 <link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
 <link rel="import" href="../paper-spinner/paper-spinner-lite.html">
+<link rel="import" href="../paper-toggle-button/paper-toggle-button.html">
 
 <link rel="import" href="data-table-column.html">
 <link rel="import" href="data-table-column-sort.html">
@@ -164,6 +165,14 @@ inspired styles to your `iron-data-table`.
         left: 50%;
         --paper-spinner-color: var(--default-primary-color);
       }
+
+      :host paper-toggle-button {
+        position: absolute;
+        top: .5em;
+        right: 4em;
+        z-index: 2;
+        @apply(--auto-refresh-icon);
+      }
     </style>
     <div id="container">
       <div id="header">
@@ -229,6 +238,9 @@ inspired styles to your `iron-data-table`.
       </iron-list>
       <template is="dom-if" if="[[ customFilter ]]">
       	<content select=".custom-filter"></content>
+      </template>
+      <template is="dom-if" if="[[ showRefreshButton ]]">
+        <paper-toggle-button checked="{{ enableAutoRefresh }}" title="[[ autoRefreshLabel ]]"></paper-toggle-button>
       </template>
     </div>
     <paper-spinner-lite active></paper-spinner-lite>
@@ -301,6 +313,39 @@ inspired styles to your `iron-data-table`.
          */
         items: {
           type: Array
+        },
+
+        /**
+         * If `true`, a toggle icon will be visible, to enable/disable the autorefresh.
+         */
+        showRefreshButton: {
+          type: Boolean,
+          value: function() {
+            return Polymer.dom(this).node.hasAttribute('enable-auto-refresh');
+          }
+        },
+
+        /**
+         * If `true`, the list will autmatically update after the specified time.
+         */
+        enableAutoRefresh: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * Automatically trigger the datasource to update the list.
+         */
+        refreshInterval: {
+          type: Number,
+          value: 20000
+        },
+
+        /**
+         * Tooltip for the refresh toggle button.
+         */
+        autoRefreshLabel: {
+          type: String
         },
 
         /**
@@ -496,6 +541,12 @@ inspired styles to your `iron-data-table`.
         '_currentPageChanged(dataSource, _currentPage)',
         '_resetData(dataSource, filter.*, sortOrder.*)'
       ],
+
+      attached: function() {
+        if (this.enableAutoRefresh) {
+          this._refreshData(this.dataSource, this._currentPage);
+        }
+      },
 
       created: function() {
         this._observer = Polymer.dom(this).observeNodes(function(info) {
@@ -1068,6 +1119,18 @@ inspired styles to your `iron-data-table`.
       _onCheckBoxTap: function(e) {
         if (this.selectionEnabled) {
           this._isSelected(e.model.item, this.selectedItems) ? this.deselectItem(e.model.item) : this.selectItem(e.model.item);
+        }
+      },
+
+      _refreshData: function() {
+        if (this.enableAutoRefresh) {
+          if (this.isDebouncerActive('reloadData')) {
+            this.cancelDebouncer('reloadData');
+          }
+          this.debounce('reloadData', this._refreshData, this.refreshInterval);
+          if (this.dataSource) {
+            this.refreshPage(this._currentPage);
+          }
         }
       }
     });
