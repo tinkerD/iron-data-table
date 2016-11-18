@@ -330,7 +330,8 @@ inspired styles to your `iron-data-table`.
          */
         enableAutoRefresh: {
           type: Boolean,
-          value: false
+          value: false,
+          observer: '_autoRefreshOnOffChange'
         },
 
         /**
@@ -1138,6 +1139,10 @@ inspired styles to your `iron-data-table`.
         if (this.isDebouncerActive('reloadData')) {
           this.cancelDebouncer('reloadData');
         }
+      },
+
+      _autoRefreshOnOffChange: function() {
+        this.fire('refresh-on-off', {refresh : this.enableAutoRefresh, table: this});
       }
     });
   </script>
