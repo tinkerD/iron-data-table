@@ -5,15 +5,38 @@ function ArrayDataSource(arr) {
     }
 
     return Array.prototype.filter.call(items, function(item, index) {
+      var filtered = true;
       for (var i = 0; i < filter.length; i++) {
         var value = Polymer.Base.get(filter[i].path, item);
-        if ([undefined, null].indexOf(filter[i].filter) > -1) {
+        if (filter[i].filter.indexOf(undefined) > -1 || filter[i].filter.indexOf(null) > -1) {
           continue;
-        } else if (value.toString().toLowerCase().indexOf(filter[i].filter.toString().toLowerCase()) === -1) {
-          return false;
+        } else {
+          if (filter[i].type === 'text') {
+            filtered = filtered && (value.toString().toLowerCase().indexOf(filter[i].filter[0].toString().toLowerCase()) > -1);
+          } else if (filter[i].type === 'number') {
+            if (!filter[i].filter[1]) {
+              filter[i].filter[1] = Number.MAX_SAFE_INTEGER;// upper limit
+            }
+            if (!filter[i].filter[0]) {
+              filter[i].filter[0] = Number.MIN_SAFE_INTEGER;// lower limit
+            }
+            filtered = filtered && (+value >= +filter[i].filter[0] && +value <= +filter[i].filter[1]);
+          } else if (filter[i].type === 'date') {
+            if (!filter[i].filter[1]) {
+              filter[i].filter[1] = new Date(4133874600000);// upper limit
+            }
+            if (!filter[i].filter[0]) {
+              filter[i].filter[0] = new Date(-2209008600000);// lower limit
+            }
+            filtered = filtered && (new Date(value).getTime() >= filter[i].filter[0].getTime() && new Date(value) <= filter[i].filter[1].getTime());
+          } else if (filter[i].type === 'boolean') {
+            filtered = filtered && (JSON.parse(filter[i].filter[0]) === JSON.parse(value));
+          } else if (filter[i].type === 'list') {
+            filtered = filtered && (filter[i].filter.indexOf(value) > -1);
+          }
         }
       }
-      return true;
+      return filtered;
     });
   }
 
