@@ -8,8 +8,8 @@ function ArrayDataSource(arr) {
       var filtered = true;
       for (var i = 0; i < filter.length; i++) {
         var value = Polymer.Base.get(filter[i].path, item);
-        if (filter[i].filter.indexOf(undefined) > -1 || filter[i].filter.indexOf(null) > -1) {
-          continue;
+        if (filter[i].filter.indexOf(undefined) > -1 || filter[i].filter.indexOf(null) > -1 || !value) {
+          filtered = false;
         } else {
           if (filter[i].type === 'text') {
             filtered = filtered && (value.toString().toLowerCase().indexOf(filter[i].filter[0].toString().toLowerCase()) > -1);
