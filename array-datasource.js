@@ -8,7 +8,7 @@ function ArrayDataSource(arr) {
       var filtered = true;
       for (var i = 0; i < filter.length; i++) {
         var value = Polymer.Base.get(filter[i].path, item);
-        if (filter[i].filter.indexOf(undefined) > -1 || filter[i].filter.indexOf(null) > -1 || value !== undefined || value !== null) {
+        if (filter[i].filter.indexOf(undefined) > -1 || filter[i].filter.indexOf(null) > -1 || value === undefined || value === null) {
           filtered = false;
         } else {
           if (filter[i].type === 'text') {
